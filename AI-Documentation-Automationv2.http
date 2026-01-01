@@ -1,0 +1,6 @@
+@AI_Documentation_Automationv2_HostAddress = http://localhost:5049
+
+GET {{AI_Documentation_Automationv2_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
