@@ -1,38 +1,42 @@
 ﻿using AI_Document_Automation.Models;
-using Microsoft.Extensions.Configuration;
 using System.Data.SqlClient;
 
 namespace AI_Document_Automation.Repository
 {
     public class DocumentRepository : IDocumentRepository
     {
-        private readonly IConfiguration _configuration;
+        private readonly string _connectionString;
 
         public DocumentRepository(IConfiguration configuration)
         {
-            _configuration = configuration;
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        public void Save(ExtractedData data)
+        // Fetch all documents from DB
+        public List<ExtractedData> GetAll()
         {
-            // Get connection string from appsettings.json
-            var connStr = _configuration.GetConnectionString("DefaultConnection");
+            var documents = new List<ExtractedData>();
 
-            using var conn = new SqlConnection(connStr);
-            conn.Open();
+            using (var conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                var cmd = new SqlCommand("SELECT InvoiceNumber, Date, Amount, VendorName, CustomerName FROM ExtractedDocuments", conn);
+                var reader = cmd.ExecuteReader();
 
-            var query = @"INSERT INTO ExtractedDocuments
-                          (InvoiceNumber, Date, Amount, VendorName, CustomerName)
-                          VALUES (@InvoiceNumber, @Date, @Amount, @VendorName, @CustomerName)";
+                while (reader.Read())
+                {
+                    documents.Add(new ExtractedData
+                    {
+                        InvoiceNumber = reader["InvoiceNumber"].ToString(),
+                        Date = reader["Date"].ToString(),
+                        Amount = reader["Amount"].ToString(),
+                        VendorName = reader["VendorName"].ToString(),
+                        CustomerName = reader["CustomerName"].ToString()
+                    });
+                }
+            }
 
-            using var cmd = new SqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@InvoiceNumber", data.InvoiceNumber);
-            cmd.Parameters.AddWithValue("@Date", data.Date);
-            cmd.Parameters.AddWithValue("@Amount", data.Amount);
-            cmd.Parameters.AddWithValue("@VendorName", data.VendorName);
-            cmd.Parameters.AddWithValue("@CustomerName", data.CustomerName);
-
-            cmd.ExecuteNonQuery();
+            return documents;
         }
     }
 }

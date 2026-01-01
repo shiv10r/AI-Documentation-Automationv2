@@ -12,19 +12,10 @@ namespace AI_Document_Automation.Business
             _repository = repository;
         }
 
-        public ExtractedData ProcessDocument()
+        // Get all documents
+        public List<ExtractedData> GetDocuments()
         {
-            var data = new ExtractedData
-            {
-                InvoiceNumber = "INV-1001",
-                Date = DateTime.Now.ToString("yyyy-MM-dd"),
-                Amount = "1500",
-                VendorName = "Demo Vendor",
-                CustomerName = "Demo Customer"
-            };
-
-            _repository.Save(data);
-            return data;
+            return _repository.GetAll();
         }
     }
 }

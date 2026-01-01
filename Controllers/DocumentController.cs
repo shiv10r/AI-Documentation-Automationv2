@@ -7,18 +7,19 @@ namespace AI_Document_Automation.Controllers
     [Route("api/[controller]")]
     public class DocumentController : ControllerBase
     {
-        private readonly IDocumentService _service;
+        private readonly IDocumentService _documentService;
 
-        public DocumentController(IDocumentService service)
+        public DocumentController(IDocumentService documentService)
         {
-            _service = service;
+            _documentService = documentService;
         }
 
-        [HttpGet("test")]
-        public IActionResult Test()
+        // GET: api/Document
+        [HttpGet]
+        public IActionResult GetAllDocuments()
         {
-            var result = _service.ProcessDocument();
-            return Ok(result);
+            var documents = _documentService.GetDocuments();
+            return Ok(documents);
         }
     }
 }
