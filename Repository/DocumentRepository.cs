@@ -1,5 +1,7 @@
 ﻿using AI_Document_Automation.Models;
 using System.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 
 namespace AI_Document_Automation.Repository
 {
@@ -12,31 +14,52 @@ namespace AI_Document_Automation.Repository
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        // Fetch all documents from DB
-        public List<ExtractedData> GetAll()
+        public void Save(ExtractedData data)
         {
-            var documents = new List<ExtractedData>();
-
-            using (var conn = new SqlConnection(_connectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
-                conn.Open();
-                var cmd = new SqlCommand("SELECT InvoiceNumber, Date, Amount, VendorName, CustomerName FROM ExtractedDocuments", conn);
-                var reader = cmd.ExecuteReader();
-
-                while (reader.Read())
+                var query = "INSERT INTO ExtractedDocuments (InvoiceNumber, Date, Amount, VendorName, CustomerName) " +
+                            "VALUES (@InvoiceNumber, @Date, @Amount, @VendorName, @CustomerName)";
+                using (var command = new SqlCommand(query, connection))
                 {
-                    documents.Add(new ExtractedData
-                    {
-                        InvoiceNumber = reader["InvoiceNumber"].ToString(),
-                        Date = reader["Date"].ToString(),
-                        Amount = reader["Amount"].ToString(),
-                        VendorName = reader["VendorName"].ToString(),
-                        CustomerName = reader["CustomerName"].ToString()
-                    });
+                    command.Parameters.AddWithValue("@InvoiceNumber", data.InvoiceNumber);
+                    command.Parameters.AddWithValue("@Date", data.Date);
+                    command.Parameters.AddWithValue("@Amount", data.Amount);
+                    command.Parameters.AddWithValue("@VendorName", data.VendorName);
+                    command.Parameters.AddWithValue("@CustomerName", data.CustomerName);
+                    connection.Open();
+                    command.ExecuteNonQuery();
                 }
             }
+        }
 
-            return documents;
+        public List<ExtractedData> GetAll()
+        {
+            var list = new List<ExtractedData>();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                var query = "SELECT * FROM ExtractedDocuments";
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(new ExtractedData
+                            {
+                                Id = (int)reader["Id"],
+                                InvoiceNumber = reader["InvoiceNumber"].ToString(),
+                                Date = reader["Date"].ToString(),
+                                Amount = reader["Amount"].ToString(),
+                                VendorName = reader["VendorName"].ToString(),
+                                CustomerName = reader["CustomerName"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            return list;
         }
     }
 }

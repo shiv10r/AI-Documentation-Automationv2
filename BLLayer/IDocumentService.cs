@@ -5,6 +5,7 @@ namespace AI_Document_Automation.Business
 {
     public interface IDocumentService
     {
+        void SaveDocument(ExtractedData data);
         List<ExtractedData> GetDocuments();
     }
 }

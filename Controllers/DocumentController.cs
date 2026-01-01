@@ -1,5 +1,7 @@
 using AI_Document_Automation.Business;
+using AI_Document_Automation.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace AI_Document_Automation.Controllers
 {
@@ -18,8 +20,16 @@ namespace AI_Document_Automation.Controllers
         [HttpGet]
         public IActionResult GetAllDocuments()
         {
-            var documents = _documentService.GetDocuments();
+            List<ExtractedData> documents = _documentService.GetDocuments();
             return Ok(documents);
+        }
+
+        // POST: api/Document
+        [HttpPost]
+        public IActionResult AddDocument([FromBody] ExtractedData data)
+        {
+            _documentService.SaveDocument(data);
+            return Ok(data);
         }
     }
 }

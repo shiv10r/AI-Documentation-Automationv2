@@ -1,5 +1,6 @@
 ﻿using AI_Document_Automation.Models;
 using AI_Document_Automation.Repository;
+using System.Collections.Generic;
 
 namespace AI_Document_Automation.Business
 {
@@ -12,7 +13,11 @@ namespace AI_Document_Automation.Business
             _repository = repository;
         }
 
-        // Get all documents
+        public void SaveDocument(ExtractedData data)
+        {
+            _repository.Save(data);
+        }
+
         public List<ExtractedData> GetDocuments()
         {
             return _repository.GetAll();
